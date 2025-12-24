@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login | 0Pages</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="icon" href="./icon.svg">
+  <meta name="color-scheme" content="dark light">
+  <script>
+    async function apiLogin(username, password) {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password })
+      });
+      return res.json();
+    }
+    function setLoading(loading) {
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = loading;
+      btn.textContent = loading ? 'Logging in...' : 'Login';
+    }
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+      if (!username || !password) {
+        msg.textContent = 'Please fill all fields';
+        msg.className = 'notice err';
+        return;
+      }
+      setLoading(true);
+      try {
+        const data = await apiLogin(username, password);
+        if (data && data.status === 'success') {
+          window.location.href = './dashboard';
+        } else {
+          msg.textContent = (data && data.message) || 'Incorrect username or password.';
+          msg.className = 'notice err';
+        }
+      } catch (err) {
+        msg.textContent = 'Network error, please try again later.';
+        msg.className = 'notice err';
+      } finally {
+        setLoading(false);
+      }
+    }
+    async function checkLogin() {
+      try {
+        const res = await fetch('/api/auth/login', { method: 'POST', credentials: 'include', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ username: 'x', password: 'x' }) });
+        const data = await res.json();
+        if (data && data.status === 'success') {
+          window.location.replace('./dashboard');
+        }
+      } catch { }
+    }
+    document.addEventListener('DOMContentLoaded', checkLogin);
+  </script>
+</head>
+
+<body>
+  <div class="center">
+    <div class="card">
+      <div class="brand" style="margin-bottom:32px;">
+        <div class="logo"></div>
+        <div>
+          <h2>0Pages</h2>
+          <div class="muted">Secure & Lightweight Static Hosting</div>
+        </div>
+      </div>
+      <div id="msg" class="notice hidden"></div>
+      <form onsubmit="handleSubmit(event)" class="row" style="margin-top:16px;">
+        <input id="username" class="input" placeholder="Username" autocomplete="username" />
+        <input id="password" type="password" class="input" placeholder="Password" autocomplete="current-password" />
+        <button id="loginBtn" class="btn" type="submit">Login</button>
+      </form>
+      <div style="margin-top:12px;text-align:center;">
+        <a href="./register" class="muted">Create an account</a>
+      </div>
+      <div class="footer">© 2025 0Pages</div>
+    </div>
+  </div>
+</body>
+
+</html>

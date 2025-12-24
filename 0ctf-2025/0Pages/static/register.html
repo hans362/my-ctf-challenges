@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Register | 0Pages</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="icon" href="./icon.svg">
+  <meta name="color-scheme" content="dark light">
+  <script>
+    async function apiRegister(username, password, confirm_password) {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, password, confirm_password })
+      });
+      return res.json();
+    }
+    function setLoading(loading) {
+      const btn = document.getElementById('registerBtn');
+      btn.disabled = loading;
+      btn.textContent = loading ? 'Registering...' : 'Register';
+    }
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      const msg = document.getElementById('msg');
+      msg.textContent = '';
+      if (!username || !password || !confirm) {
+        msg.textContent = 'Please fill all fields';
+        msg.className = 'notice err';
+        return;
+      }
+      setLoading(true);
+      try {
+        const data = await apiRegister(username, password, confirm);
+        if (data && data.status === 'success') {
+          window.location.href = './login.html';
+        } else {
+          msg.textContent = (data && data.message) || 'Registration failed.';
+          msg.className = 'notice err';
+        }
+      } catch (err) {
+        msg.textContent = 'Network error, please try again later.';
+        msg.className = 'notice err';
+      } finally {
+        setLoading(false);
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <div class="center">
+    <div class="card">
+      <div class="brand" style="margin-bottom:32px;">
+        <div class="logo"></div>
+        <div>
+          <h2>0Pages</h2>
+          <div class="muted">Secure & Lightweight Static Hosting</div>
+        </div>
+      </div>
+      <div id="msg" class="notice hidden"></div>
+      <form onsubmit="handleSubmit(event)" class="row" style="margin-top:16px;">
+        <input id="username" class="input" placeholder="Username" autocomplete="username" />
+        <input id="password" type="password" class="input" placeholder="Password" autocomplete="new-password" />
+        <input id="confirm" type="password" class="input" placeholder="Confirm Password" autocomplete="new-password" />
+        <button id="registerBtn" class="btn" type="submit">Register</button>
+      </form>
+      <div style="margin-top:12px;text-align:center;">
+        <a href="./login" class="muted">Already have an account? Login</a>
+      </div>
+      <div class="footer">© 2025 0Pages</div>
+    </div>
+  </div>
+</body>
+
+</html>
